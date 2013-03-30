@@ -1,12 +1,32 @@
 
+number = 10;
+pi = 3.142;
+learning_rate = 0.1;
 
 
-x_input = rand(1,1);
+x_input = rand(1,number);
+x_input = x_input * 0.5 *pi;
+
+x_0 = [ 0 ];
+x_input = [x_input,x_0];
+
+x_temp = rand(1,number);
+x_temp = x_temp * 0.5 * (-pi);
+
+x_input = [x_input,x_temp];
+
+
+
+%x_input = sort(x_input);
+
+required_output = rand(1,number*2);
+calculated_output = rand(1,number*2);
+
 x_hidden = [ 1 1 1 ];
 x_output = [ 1 1 1 ];
 
 
-y_first = [ 1 1 1 ];
+y_first = [ 1 ];
 y_second = [ 1 1 1 ];
 y_third = [ 1 ];
 
@@ -22,6 +42,9 @@ delta_output = [ 1 ];
 delta_hidden = [ 1 1 1 ];
 delta_input = [ 1 ];
 
+function [dy] = sigmoid_derivative(s)
+dy = (4 * exp(-2*s)) ./ ((1 + exp(-2*s)) .* (1 + exp(-2*s))); 
+end
 
 function [ out ] = sigmoidd( s )
 	out = (1 - exp(-2*s)) ./ (1 + exp(-2*s));
@@ -31,7 +54,7 @@ function [ out ] = forward_hidden( x , w , b )
 	j = 1;
 	for i = x
 		out(j)= w(j)*i + b(j);
-		disp(out(j));
+%		disp(out(j));
 		j= j + 1;
 
 	endfor; 
@@ -58,44 +81,88 @@ end
 
 
 
+
+for iter = 1000
 % Looping through all the input cases
-for i = x_input 
-%
-% Forward Pass begins:
-%
-	disp(i) 
-% layer 1 
-	y_first = i * w_input(1) + b_input(1);     
-	out = sigmoidd(y_first);  	
-	x_hidden = x_hidden * out;
+	count = 1;
+	for i = x_input 
+	%
+	% Forward Pass begins:
+	%
+		%disp(i) 
+	% layer 1 
+		y_first = i * w_input(1) + b_input(1);     
+		out = sigmoidd(y_first);  	
+		x_hidden = x_hidden * out;
 	
-	y_second = [ 1 1 1 ];
-	y_second = forward_hidden(x_hidden,w_hidden,b_hidden);
+		y_second = [ 1 1 1 ];
+		y_second = forward_hidden(x_hidden,w_hidden,b_hidden);
 
-% layer 2
-	k = 1;	
-	for j = y_second
-		x_output(k) = sigmoidd(j);
-		k = k + 1;	
-	endfor;
-% layer 3
-	y_third = forward_output(x_output, w_output, b_output);
-	y_target = sigmoidd(y_third);
-	disp(y_target);
+	% layer 2
+		k = 1;	
+		for j = y_second
+			x_output(k) = sigmoidd(j);
+			k = k + 1;	
+		endfor;
+	% layer 3
+		y_third = forward_output(x_output, w_output, b_output);
+		y_target = sigmoidd(y_third);
+		%disp(y_target);
 
-% find actual tan answer
-	y_expected = tan(i);	
+	% find actual tan answer
+		y_expected = tan(i);	
 	
 
-% calculating error
-	delta_output = y_expected - y_target;
+	% calculating error
+		delta_output = y_expected - y_target;
+		error = delta_output;
 
-	delta_hidden = propogate_delta_to_hidden(w_output,delta_output);
-	delta_input = propogate_delta_to_input(w_hidden,delta_hidden);
+		%delta_hidden = propogate_delta_to_hidden(w_output,delta_output);
+		%delta_input = propogate_delta_to_input(w_hidden,delta_hidden);
 
+		new_weight_hidden = [ 1 1 1];
+		new_weight_output = [1 1 1];
+		new_weight_input = [1];
+	
+		new_weight_output(1) = w_output(1) - learning_rate*error*sigmoid_derivative(y_target)*x_output(1);
+		new_weight_output(2) = w_output(2) - learning_rate*error*sigmoid_derivative(y_target)*x_output(2);
+		new_weight_output(3) = w_output(3) - learning_rate*error*sigmoid_derivative(y_target)*x_output(3);
+
+		new_weight_hidden(1) = w_hidden(1) - learning_rate*error*sigmoid_derivative(y_second(1))*x_hidden(1)*w_output(1);
+		new_weight_hidden(2) = w_hidden(2) - learning_rate*error*sigmoid_derivative(y_second(2))*x_hidden(2)*w_output(2);
+		new_weight_hidden(3) = w_hidden(3) - learning_rate*error*sigmoid_derivative(y_second(3))*x_hidden(3)*w_output(3);
+
+		new_weight_input(1) = w_input(1) - (learning_rate*error*sigmoid_derivative(y_first(1))*i*w_hidden(1) +  learning_rate*error*sigmoid_derivative(y_first(1))*i*w_hidden(2) + learning_rate*error*sigmoid_derivative(y_first(1))*i*w_hidden(3) );	
+
+	 	w_input = new_weight_input;
+	 	w_hidden = new_weight_hidden;
+	 	w_output = new_weight_output;
+		disp(w_input);
+		disp(w_hidden);
+		disp(w_output);
 
 		
+		required_output(count) = tan(i);
+		calculated_output(count) = y_target;
+		count = count+1;
+	
+	endfor;
 
+%	plot_x1 = x_input;
+%	plot_y1 = calculated_output;
+%	[val ind ] = sort(plot_x1);
+%	plot_y1 = plot_y1(ind);
+%
+%	plot_x2 = sort(x_input);
+%	plot_y2 = tan(x_input);
+%	[val ind ] = sort(plot_x2);
+%	plot_y2 = plot_y2(ind);
+%	plot(plot_x1,plot_y1,plot_x2,plot_y2);	
+
+	plot(x_input,required_output,x_input,calculated_output);
+
+
+	
 
 endfor;
 
