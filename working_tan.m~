@@ -1,45 +1,20 @@
-%   Neural network 1-3-1 learning the tangent curve
 
-number = 10; 		% used to get random input values, 10 on the negative side, 10 on the positive side
-pi = 3.1;    		% defining value of pi
-learning_rate = 0.1;	% learning rate
-limit = 0.25;		% limits of the range of inputs, eg. if limit is 0.5 i.e. 1/2, then the range is (-pi/2,pi/2)
+number = 10;
+pi = 3.1;
+learning_rate = 0.1;
+limit = 0.3;
 
-%
-%	Nomenclature for elements in the neural network:
-%	
-%_______________________________________________________________________________________________
-%	Layer 1			|	Layer 2			| 	Layer 3			|
-%_______________________________________________________________________________________________
-%				|				|				|
-%	bias = bias_input	|	bias = bias_hidden	|	bias = bias_output	|
-%				|				|				|
-%	input = x_input		|	input = x_hidden	|	input = x_output	|
-%				|				|				|
-%    for the summation function:|				|				|
-%	output = y_first	|	output = y_second	|	output = y_third	|
-%				|				|				|
-%    for the output of tau function:				|				|
-%	output = x_hidden	|	output = x_output	|	output = y_target	|
-%				|				|				|
-%_______________________________________________________________________________________________
 
-% generating random positive inputs between 0 to 1
+
 x_input = rand(1,number);
-
-% scaling the inputs to the limits
 x_input = x_input * limit *pi;
 
 x_0 = [ 0 ];
 x_input = [x_input,x_0];
 
-% generating random negative inputs between 0 to 1
 x_temp = rand(1,number);
-
-% scaling the inputs to the limits
 x_temp = x_temp * limit * pi * (-1);
 
-% concatenating the two sets of inputs
 x_input = [x_input,x_temp];
 
 
@@ -222,7 +197,7 @@ for iter = 1:100
 	fprintf("Interation %d: %f %f %f \n",iter,w_input, w_hidden,w_output);
 	%key = input('<Press enter to continue, q to quit.>', 's');
 
-	%if (key == 'q' || iter == 100)
+	%if (key == 'q')
 	 %  return;
 	%end
 
