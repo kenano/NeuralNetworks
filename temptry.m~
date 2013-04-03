@@ -1,9 +1,9 @@
-% Neural network 1-3-1 learning the tangent curve
-number = 10; % used to get random input values, 10 on the negative side, 10 on the positive side
+number = 100; % used to get random input values, 10 on the negative side, 10 on the positive side
 pi = 3.1; % defining value of pi
 eta = 0.1;  % learning rate
-limit = 0.25;	% limits of the range of inputs, eg. if limit is 0.5 i.e. 1/2, then the range is (-pi/2,pi/2)
-
+limit = 1.5;	% limits of the range of inputs, eg. if limit is 0.5 i.e. 1/2, then the range is (-pi/2,pi/2)
+total = number*2+1;
+total = 201
 %
 %
 % Nomenclature for elements in the neural network:
@@ -12,7 +12,7 @@ limit = 0.25;	% limits of the range of inputs, eg. if limit is 0.5 i.e. 1/2, the
 % Layer 1                   |                Layer 2            |          Layer 3            |
 %_______________________________________________________________________________________________
 %                           |                                   |                             |
-%   bias = bias_input       |         bias = bias_hidden        |     bias = bias_output      |
+%   bias = b_input	    |         bias = b_hidden           |     bias = b_output         |
 %                           |                                   |                             |
 %   input = x_input         |        input = x_hidden           |       input = x_output      |
 %                           |                                   |                             |
@@ -35,7 +35,8 @@ limit = 0.25;	% limits of the range of inputs, eg. if limit is 0.5 i.e. 1/2, the
 %______________________________________________________________________________________________
 
 %Defining the input vector
-x_input = -pi*limit:pi*limit/number:pi*limit;
+x_input = -limit:limit/total:limit;
+scale=tan(max(x_input));
 
 %The actual output that the neural network needs to learn
 required_output = tan(sort(x_input));
@@ -50,9 +51,9 @@ y_first = [ 1 1 1 ];
 y_second = [ 1 1 1 ];
 y_third = [ 1 ];
 
-w_input = rand(1,1);
-w_hidden = rand(1,3);
-w_output = rand(1,3);
+w_input = 3*rand(1,1);
+w_hidden = 3*rand(1,3);
+w_output = 3*rand(1,3);
 
 b_input = rand(1,1);
 b_hidden = rand(1,3);
@@ -109,6 +110,17 @@ j = j+1;
 endfor;
 end
 
+function[ D ] = calculateC3(Ynn,x_input,iterations)
+    sum_of_error = 0;
+    for loop = 1:iterations
+        error = (Ynn(loop) - tan(x_input(loop)));
+        error = (error^2);
+        sum_of_error = sum_of_error + error;
+    endfor;
+    D =( 1/iterations ) * sqrt(sum_of_error);
+    fprintf("\nD is %f",D);
+end
+
 function [ delta_input ] = propogate_delta_to_input(w_hidden, delta_hidden)
 w_hidden_t = transpose(w_hidden);
 delta_input = delta_hidden*w_hidden_t;
@@ -122,7 +134,7 @@ disp(w_output);
 for iter = 1 : 1000
 % Looping through all the input cases
 % Select a random input from the input vector (u,y)
-ctr = ceil(rand(1,1) * 21); 
+ctr = ceil(rand(1,1) * total); 
 % Looping through all the input cases
 count = 1;
 
@@ -168,14 +180,14 @@ y_target = sigmoidd(y_third);
 %disp(y_target);
 
 % find actual tan answer
-y_expected = tan(i);	
+y_expected = tan(i)/scale;	
 
 
 % calculating error
 delta_output = y_expected - y_target;
 
 %Update weights only if error is greater than 0.05 or less than -0.05
-if(delta_output > 0.05 || delta_output < 0.05)
+%if(delta_output > 0.05 || delta_output < 0.05)
 
 delta_hidden = propogate_delta_to_hidden(w_output,delta_output);
 delta_input = propogate_delta_to_input(w_hidden,delta_hidden);
@@ -207,7 +219,7 @@ db_output = eta * delta_output .* sigmoidd_derivative( y_third );
 b_output = b_output + db_output;
 
  
-end
+%end
 
 endfor;
 
@@ -249,21 +261,29 @@ count1 = count1 +1;
 endfor;
 
 %Calculating Sum of average error difference
-D = (1/(number*2+1)) * sqrt( sum ( calculated_output - required_output));
+%D = (1/(number*2+1)) * sqrt( sum ( calculated_output - required_output));
 
 %Plot the graph
 plot_x = sort(x_input);
 plot_y1 = calculated_output;
 plot_y2 = required_output;
-plot(plot_x,plot_y1,plot_x,plot_y2);	
+plot(plot_x,plot_y1,plot_x,plot_y2/scale);	
 
 printf("Learned Weights\n");
 disp(w_input);
 disp(w_hidden);
 disp(w_output);
-printf("Sum of Average Error difference, D = ");
-disp(D);
 
+printf("Learned Bias\n");
+disp(b_input);
+disp(b_hidden);
+disp(b_output);
+
+printf("Sum of Average Error difference, D = ");
+
+% C3
+D = calculateC3(calculated_output,x_input,(total));
+disp(D);
 
 
 

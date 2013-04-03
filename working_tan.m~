@@ -124,7 +124,7 @@ end
 
 
 
-for iter = 1:10000
+for iter = 1:30
 % Looping through all the input cases
 	count = 1;
 	ctr = ceil(rand(1,1) * 21); 
