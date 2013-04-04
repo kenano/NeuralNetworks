@@ -126,22 +126,6 @@ function[ D ] = calculateC3(Ynn,x_input,iterations)
     fprintf("\nD is %f",D);
 end
 
-function [ out ] = forward_hidden( x , w , b )
-	j = 1;
-	for i = x
-		out(j)= w(j)*i + b(j);
-		%disp(out(j));
-		j= j + 1;
-	endfor;
-end
-
-function [ out ] = forward_output( x , w , b )
-	x_t = transpose(x);
-	out = w*x_t;
-	out = out + b;
-end
-
-
 function [ delta_input ] = propogate_delta_to_input(w_hidden, delta_hidden)
 	w_hidden_t = transpose(w_hidden);
 	delta_input = delta_hidden*w_hidden_t;
