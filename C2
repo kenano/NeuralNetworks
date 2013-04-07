@@ -1,0 +1,186 @@
+clear;
+% Neural network 1-3-1 learning the tangent curve
+number = 10; % used to get random input values, 10 on the negative side, 10 on the positive side
+pi = 3.1; % defining value of pi
+eta = 0.1;  % learning rate
+limit = 0.25;  % limits of the range of inputs, eg. if limit is 0.5 i.e. 1/2, then the range is (-pi/2,pi/2)
+input_count= 21;				%number of inputs we are testing. 		
+
+
+%Defining the input vector
+x_input = -pi*limit:pi*limit/number:pi*limit;
+
+%The actual output that the neural network needs to learn
+required_output = tan(sort(x_input));
+calculated_output = [];
+
+%Initialising all variables
+
+x_hidden = [ 1 1 1 ];
+x_output = [ 1 1 1 ];
+
+y_first = [ 1 1 1 ];
+y_second = [ 1 1 1 ];
+y_third = [ 1 ];
+
+%w_input = rand(1,1);
+%w_hidden = rand(1,3);
+%w_output = rand(1,3);
+
+%b_input = rand(1,1);
+%b_hidden = rand(1,3);
+%b_output = rand(1,1);
+
+
+count1 =1;
+
+w_input = [0.726811 ];
+w_hidden = [2.016634 2.740398 2.001433 ];
+w_output = [1.885439 -0.081547 1.202726 ];
+
+
+b_input = [-0.971001 ];
+b_hidden = [1.369403 0.877756 -0.104604 ];
+b_output = [1.271501 ];
+
+%learned_w =[1.029141 2.374782 2.824092 2.174076 1.946559 0.506498 1.792632 ;
+%			0.813071 1.701663 2.761675 1.931489 1.924507 0.307827 1.594203 ;
+%			0.934174 1.592535 2.702428 1.866062 1.958818 0.299556 1.548455 ;
+%			0.720254 1.810517 2.736773 1.973742 1.954141 0.089231 1.382602 ;
+%			0.726811 2.016634 2.740398 2.001433 1.885439 -0.081547 1.202726 ];
+
+learned_w = [2.10016 1.48257 2.68902 1.91519 1.8878 0.37012 1.62458;
+			 0.84741 1.83664 2.74724 1.94246 1.95224 0.18387 1.47706;
+ 			 0.76841 2.18407 2.73566 2.05325 1.84506 -0.19237 1.0508;
+ 			 1.05342 1.39394 2.68189 2.05565 1.79178 0.5611 0.50806;
+ 			 1.11097 1.61221 2.75336 2.07964 1.80684 0.72917 0.49761];
+
+%learned_b =  [-0.958094 0.750705 0.852179 0.300535 0.625551;
+%			-0.880641 1.607110 0.897666 0.339706 0.866246 ;
+%			-0.967209 1.596525 0.915483 -0.236825 0.873513 ;
+%			-0.946625 1.478775 0.829751 -0.229578 0.992729 ;
+%			-0.971001 1.369403 0.877756 -0.104604 1.271501 ];
+
+learned_b = [-0.863505 1.48499 0.950287 -0.439382 0.698738;
+ 			 -0.946913 1.50833 0.8732799999999999 0.07122199999999999 0.931619;
+   			 -0.940267 1.156913 0.901551 -0.216568 1.461205;
+ 			 -0.450736 -1.052606 1.367489 -1.119868 1.887899;
+ 			 -0.397768 -1.286464 1.918849 -1.182946 1.737721 ];
+
+
+loop_num = 1;
+while loop_num < 6
+
+	this_w = learned_w(loop_num,:);
+	w_input = this_w(1);
+	w_hidden = [this_w(1,2) this_w(1,3) this_w(1,4)];
+	w_output = [this_w(1,5) this_w(1,6) this_w(1,7)];
+	
+
+	this_b = learned_b(loop_num,:);
+	b_input = this_b(1);
+	b_hidden = [this_b(1,2) this_b(1,3) this_b(1,4)];
+	b_output = [this_b(1,5)];
+
+	calculated_output = [];
+
+	count1 =1;
+	% run forward passs again to get values
+	for i = sort(x_input)
+
+		x_hidden = [ 1 1 1 ];
+		x_output = [ 1 1 1 ];
+
+
+		y_first = [ 1 ];
+		y_second = [ 1 1 1 ];
+		y_third = [ 1 ];
+
+		% layer 1
+		y_first = i * w_input(1) + b_input(1);
+		out = sigmoidd(y_first);
+		x_hidden = x_hidden * out;
+
+		y_second = forward_hidden(x_hidden,w_hidden,b_hidden);
+
+		% layer 2
+		k = 1;	
+		for j = y_second
+			x_output(k) = sigmoidd(j);
+			k = k + 1;	
+		endfor;
+
+		% layer 3
+		y_third = forward_output(x_output, w_output, b_output);
+		y_target = sigmoidd(y_third);
+
+		calculated_output(count1) = y_target;
+		count1 = count1 +1;
+	endfor;
+
+
+	%%%%%%% Calculating Sum of average error difference %%%%%%
+	%D = (1/(number*2+1)) * sqrt( sum ( calculated_output - required_output));
+
+	%calculated_output
+	%x_input
+	%input_count
+
+	D = calculateD(calculated_output,x_input,input_count);
+	fprintf("For loop %i, D is %f\n",loop_num, D);
+	loop_num = loop_num + 1;	
+end
+
+%Plot the graph
+%plot_x = sort(x_input);
+%plot_y1 = calculated_output;
+%plot_y2 = required_output;
+%plot(plot_x,plot_y1,plot_x,plot_y2);	
+
+printf("Learned Weights\n");
+disp(w_input);
+disp(w_hidden);
+disp(w_output);
+printf("Sum of Average Error difference, D = ");
+disp(D);
+
+
+
+%%%%%%% function definitions %%%%%%%%%%%%%%%%%
+%Sigmoid function G(s)
+function [ out ] = sigmoidd( s )
+out = (1 - exp(-2*s)) ./ (1 + exp(-2*s));
+end
+
+%Sigmoid derivative function G'(s)
+function [ out ] = sigmoidd_derivative( s )
+out = (4 * exp(-2*s)) ./ ((1 + exp(-2*s)) .* (1 + exp(-2*s))) ;
+end
+
+
+function [ out ] = forward_hidden( x , w , b )
+j = 1;
+for i = x
+out(j)= w(j)*i + b(j);
+%disp(out(j));
+j= j + 1;
+endfor;
+end
+
+function [ out ] = forward_output( x , w , b )
+x_t = transpose(x);
+out = w*x_t;
+out = out + b;
+end
+
+
+function [ D ] = calculateD(Ynn, x_input, iterations)
+    sum_of_error = 0;
+    for loop = 1:iterations
+        error = (Ynn(loop) - tan(x_input(loop)));
+        error = (error^2);
+        sum_of_error = sum_of_error + error;
+    endfor;
+    D =( 1/iterations ) * sqrt(sum_of_error);
+    %fprintf("\nD is %f",D);
+end
